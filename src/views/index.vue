@@ -69,7 +69,7 @@
                         </el-form-item>
 
                         <el-form-item label="图表主题：" prop="chartTheme" class="form_item left">
-                            <el-select v-model="chartTheme" placeholder="请选择" disabled>
+                            <el-select v-model="chartTheme" placeholder="请选择" :disabled="true">
                                 <el-option v-for="(val,index) in themeOptions" :key="index"
                                     :label="val" :value="val">
                                 </el-option>
