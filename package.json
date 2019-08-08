@@ -10,10 +10,9 @@
   "dependencies": {
     "@handsontable/vue": "^4.0.0",
     "axios": "^0.17.1",
+    "echarts": "^4.2.1",
     "element-ui": "^2.10.0",
     "handsontable": "^7.1.0",
-    "install": "^0.13.0",
-    "npm": "^6.10.1",
     "vue": "^2.6.10",
     "vue-axios": "^2.0.2",
     "vue-router": "^3.0.3",

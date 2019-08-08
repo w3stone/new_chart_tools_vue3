@@ -78,7 +78,7 @@
                         </el-form-item>
 
                         <el-form-item label="图表主题：" prop="chartTheme" class="form_item left">
-                            <el-select v-model="chartTheme" placeholder="请选择" :disabled="true">
+                            <el-select v-model="chartTheme" placeholder="请选择">
                                 <el-option v-for="(val,index) in themeOptions" :key="index"
                                     :label="val" :value="val">
                                 </el-option>
@@ -117,25 +117,19 @@
             <el-button type="primary" class="button_fixed" @click="getChart()">获取图表</el-button>
         </div>
 
-        <!-- <el-dialog title="图表展现" :width="panelWidth+60" :visible.sync="chartDgVisible">
-            <div class="chart_panel" :style="{'width':panelWidth+'px', 'height':panelHeight+'px'}" id="chart" ref="chart"></div>
-        </el-dialog> -->
-
-        <div class="main_chart" style="padding:10px 80px">
-            <h3 class="sub_title"><i class="el-icon-data-analysis title_icon"></i>图表展现</h3>
-            <div class="chart_panel" :style="{'width':panelWidth+'px', 'height':panelHeight+'px'}"
-                id="chart" ref="chart">
-            </div>
-        </div>
+        <!--图表弹框-->
+        <chart-modal :panelWidth="panelWidth" :panelHeight="panelHeight" :visible.sync="chartDgVisible"
+            :data="form" :config="chartConfig" :theme="chartTheme">
+        </chart-modal>
 
     </div>
 </template>
 
 <script>
-    import {mapState, mapGetters} from 'vuex'
     import {HotTable} from '@handsontable/vue';
     import Handsontable from 'handsontable';
     import 'handsontable/languages/zh-CN';
+    import chartModal from '@/components/chartModal';
     import {baseParams, chartConfig, charttypeOptions} from '@/assets/scripts/file.js';
 	
 	export default {
@@ -191,7 +185,7 @@
                 panelWidth: 1100,
                 panelHeight: 480,
                 chartTheme: "macarons", //图表主题
-                themeOptions: ["macarons", "walden"],
+                themeOptions: ["macarons", "infographic", "dark", "roma", "shine", "vintage"],
                 charttypeOptions: [],
                 chartdataType: 1,
                 echart: null, //echart对象
@@ -229,6 +223,8 @@
                     result = this.analyzeJson();
                 }
                 if(!result) return false;
+
+                this.chartDgVisible = true;
                 
                 //绘图
                 let suCharts = new SuCharts(this.form, "chart", this.form.charttype, this.chartTheme);
@@ -347,7 +343,7 @@
             },
         },
 		components:{
-			HotTable
+			HotTable, chartModal
         }
 	}
 	
