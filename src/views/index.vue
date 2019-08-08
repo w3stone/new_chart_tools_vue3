@@ -48,9 +48,18 @@
                     </el-form-item>
                 </div>
 
-                <el-form-item label="图表数据：" prop="hotData" class="form_item">
-                    <div class="form_hottable" :style="{overflowX:needOverflow?'auto':'initial'}">
+                <el-form-item label="图表数据：" prop="" class="form_item form_chartdata">
+                    <el-radio-group v-model="chartdataType" class="form_radio">
+                        <el-radio-button :label="1">表格</el-radio-button>
+                        <el-radio-button :label="2">JSON</el-radio-button>
+                    </el-radio-group>
+
+                    <div class="form_hottable" :style="{overflowX:needOverflow?'auto':'initial'}" v-show="chartdataType==1">
                         <hot-table :data="hotData" :settings="hotSettings" :language="language" ref="hotTable"></hot-table>
+                    </div>
+
+                    <div class="form_chart_json" v-show="chartdataType==2">
+                        <el-input type="textarea" v-model="jsonData" :rows="rows"></el-input>
                     </div>
                 </el-form-item>
 
@@ -127,7 +136,7 @@
     import {HotTable} from '@handsontable/vue';
     import Handsontable from 'handsontable';
     import 'handsontable/languages/zh-CN';
-import { setTimeout } from 'timers';
+    import {baseParams, chartConfig, charttypeOptions} from '@/assets/scripts/file.js';
 	
 	export default {
         name: "home",
@@ -135,34 +144,12 @@ import { setTimeout } from 'timers';
             return{
                 rows: 10, //默认行数
                 cols: 20, //默认列数
-                //主要配置
-                form:{
-                    title: "",
-                    xtitle: "",
-                    xunit: "",
-                    ytitle: "",
-                    yunit: "",
-                    vtitle: "",
-                    vunit: "",
-                    nunit: "",
-                    charttype: 101
-                },
-                chartConfig:{ //图表配置
-                    ifTitle: true, //标题
-                    titleFontSize: 18,
-                    labelFontSize: 16,
-                    axisFontSize: 13,
-                    axisTitleFontSize: 13, //坐标轴标题大小
-                    legendFontSize: 13,
-                    mapConfig: {
-                        dataRangeShow: false,
-                        rangeLowColor: "",
-                        rangeHighColor: ""
-                    }
-                },
+                form: {}, //主要配置
+                chartConfig: {}, //图表参数配置
                 needOverflow: false,
                 language: 'zh-CN', //表格控件语言
                 hotData: [], //表格数据
+                jsonData: "", //json数据
                 hotSettings: {
                     colHeaders: [],//自定义列表头or 布尔值
                     rowHeaders: false,
@@ -205,38 +192,17 @@ import { setTimeout } from 'timers';
                 panelHeight: 480,
                 chartTheme: "macarons", //图表主题
                 themeOptions: ["macarons", "walden"],
-                charttypeOptions:[
-                    {name:'柱状图', options:[
-                        {name:'普通柱状图', type: 101, disabled:false},
-                        {name:'柱状图+增长率', type: 102, disabled:false},
-                        {name:'柱状图+折线图', type: 103, disabled:true},
-                        {name:'柱状图普通（含平均值线）', type: 104, disabled:false},
-                        {name:'柱状图百分比（相同x和为100%, 堆叠）', type: 105, disabled:false},
-                        {name:'柱状图百分比（相同x和为100%）', type: 106, disabled:false},
-                        {name:'柱状图百分比（相同name,即相同颜色和为100%）', type: 107, disabled:false},
-                        {name:'柱状图百分比（相同name,即相同颜色和为100%）+增长率', type: 108, disabled:true},
-                        {name:'柱状图+增长率', type: 109, disabled:true},
-                        {name:'普通柱状图堆叠', type: 110, disabled:false},
-                        {name:'柱状图动态求和', type: 113, disabled:false}
-                    ]},
-                    {name:'散点图', options:[
-                        {name:'普通散点图', type: 401, disabled:false},
-                        {name:'相同颜色散点图', type: 402, disabled:false},
-                        {name:'普通散点图(自动求平均)', type: 403, disabled:false},
-                        {name:'散点图(分两组&双平均)', type: 404, disabled:true}
-                    ]},
-                    {name:'饼图', options:[
-                        {name:'普通饼图', type: 201, disabled:false},
-                        {name:'环形饼图', type: 202, disabled:false}
-                    ]},
-                    {name:'地图', options:[
-                        {name:'中国省份地图', type: 99, disabled:false}
-                    ]}
-                ],
+                charttypeOptions: [],
+                chartdataType: 1,
                 echart: null, //echart对象
                 configShowing: false, //其它配置项显示状态
                 chartDgVisible: false, //图表弹框显示状态
             }
+        },
+        created(){
+            this.charttypeOptions = charttypeOptions;
+            this.form = baseParams;
+            this.chartConfig = chartConfig;
         },
         mounted(){
             this.hotData = this.initData();
@@ -252,6 +218,28 @@ import { setTimeout } from 'timers';
                     outer.push(inner);
                 }
                 return outer;
+            },
+            //获取图表
+            getChart(){
+                //拼接chartdata;
+                let result = false;
+                if(1==this.chartdataType){
+                    result = this.chartScheme();
+                }else if(2==this.chartdataType){
+                    result = this.analyzeJson();
+                }
+                if(!result) return false;
+                
+                //绘图
+                let suCharts = new SuCharts(this.form, "chart", this.form.charttype, this.chartTheme);
+                let option = suCharts.setOption(this.chartConfig);
+                //delete option.toolbox;
+
+                this.echart = echarts.init(document.getElementById("chart"), this.chartTheme); //初始化echarts实例
+                this.echart.clear(); //清空
+                this.echart.resize(); //重新自适应
+                this.echart.setOption(option);
+
             },
             make3D_data(arr){ //拼接柱状图json
                 let jsonList = [];
@@ -281,24 +269,51 @@ import { setTimeout } from 'timers';
                 }
                 return jsonList;
             },
-            //获取图表
-            getChart(){
-                //拼接chartdata;
-                this.form.chartdata = this.chartScheme();
+            analyzeJson(){ //解析json
+                let errorAlert = ()=>{
+                    this.$message({message:'数据格式错误！', type:'error'});
+                    return false;
+                };
+                let checkList = (list)=>{
+                    return (list.length>0 && typeof list[0]!="undefined")? true: false;
+                };
+                let checkChartdata = (chartdata, callback)=>{
+                    let xdata = Enumerable.from(chartdata).select(o=>o.x).distinct().toArray();
+                    let ydata = Enumerable.from(chartdata).select(o=>o.y).distinct().toArray();
+                    let valuedata = Enumerable.from(chartdata).select(o=>o.value).distinct().toArray();
+                    let namedata = Enumerable.from(chartdata).select(o=>o.name).distinct().toArray();
 
-                //绘图
-                let suCharts = new SuCharts(this.form, "chart", this.form.charttype, this.chartTheme);
-                let option = suCharts.setOption(this.chartConfig);
-                //delete option.toolbox;
+                    if( checkList(xdata) && checkList(xdata) && checkList(valuedata) && checkList(namedata) ){
+                        if(callback) callback();
+                    }else{
+                        return errorAlert();
+                    }
+                    return true;
+                };
 
-                this.echart = echarts.init(document.getElementById("chart"), this.chartTheme); //初始化echarts实例
-                this.echart.clear(); //清空
-                this.echart.resize(); //重新自适应
-                this.echart.setOption(option);
+                try {
+                    let json = JSON.parse(this.jsonData);
+                    let chartdata = [];
+                    if(json.hasOwnProperty("chartdata")){
+                        chartdata = json.chartdata;
+                        return checkChartdata(chartdata, ()=>{
+                            this.form = json;
+                        });
 
-            },
-            toggleShow(){
-                this.configShowing = !this.configShowing;
+                    }else if(Array.isArray(json)){ //如果是数组
+                        chartdata = json;
+                        return checkChartdata(chartdata, ()=>{
+                            this.form.chartdata = json;
+                        });
+
+                    }else{
+                        return errorAlert();
+                    }
+
+                } catch (error) {
+                    console.log(error);
+                    return errorAlert();  
+                }
             },
             //图表类型分组
             chartScheme(){
@@ -314,7 +329,8 @@ import { setTimeout } from 'timers';
                     }else if((charttype>200 && charttype<=299) || charttype==99){
                         result = this.make2D_data(this.hotData);
                     }
-                    return result;
+                    this.form.chartdata = result;
+                    return true;
 
                 } catch (error) {
                     console.log(error);
@@ -325,7 +341,10 @@ import { setTimeout } from 'timers';
             //地图颜色自动赋值
             mapColorChanged(value){
                 this.chartConfig.mapConfig.rangeHighColor = value;
-            }
+            },
+            toggleShow(){
+                this.configShowing = !this.configShowing;
+            },
         },
 		components:{
 			HotTable
@@ -374,6 +393,11 @@ import { setTimeout } from 'timers';
                 height: 40px;
             }
         }
+        .form_chartdata{
+            .form_radio{
+                margin-bottom: 20px;
+            }
+        }
         //图表
         .main_chart{
             text-align: center;
@@ -382,6 +406,7 @@ import { setTimeout } from 'timers';
                 border: 1px solid #ededed;
             }
         }
+        //提交按钮
         .button_fixed{
             position: fixed;
             top: 20px;
