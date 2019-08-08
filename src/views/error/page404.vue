@@ -18,26 +18,18 @@
 </template>
 
 <script>
-	import {mapState, mapMutations} from 'vuex'
-
 	export default {
         name:'page404',
         data(){
             return {
                 mainUrl: "/hospital", //主页
                 countDown: 5,
-                timer: "", //定时器
-                jumpShow: true //是否自动跳转
+                timer: null, //定时器
+                jumpShow: true, //是否自动跳转
+                imgDomain: ""
             }
         },
-        computed:{
-            ...mapState({
-                "imgDomain": state => state.imgDomain
-            })
-        },
         mounted(){
-            this.setLoading(false);
-            
             //如果路由含有404, 则不执行自动跳转
             let path = this.$route.path;
             if(path.indexOf("/404")>-1){
@@ -58,11 +50,6 @@
         },
         destroyed(){
             clearInterval(this.timer);
-        },
-        methods:{
-            ...mapMutations({
-                setLoading: "setLoading"
-            })
-        }  
+        }
 	}
 </script>

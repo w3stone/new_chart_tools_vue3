@@ -13,8 +13,6 @@
 </template>
 
 <script>
-	import {mapState, mapMutations} from 'vuex'
-
 	export default {
         name:'page500',
         computed:{

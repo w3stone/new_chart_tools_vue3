@@ -10,7 +10,6 @@
 </template>
 
 <script>
-    import {mapState, mapMutations} from 'vuex'
     import tableItem from '@/components/tableItem.vue'
     
     export default {
