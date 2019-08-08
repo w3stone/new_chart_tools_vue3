@@ -9,6 +9,7 @@
 
 <script>
     import echarts from "echarts";
+    import china from 'echarts/map/json/china.json'
     import 'echarts/theme/dark'
     import 'echarts/theme/infographic'
     import 'echarts/theme/macarons'
@@ -39,6 +40,7 @@
         },
         mounted(){
             this.dgVisible = this.visible;
+            echarts.registerMap('china', china);
         },
         methods:{
             makeChart(){
