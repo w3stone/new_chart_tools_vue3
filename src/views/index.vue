@@ -225,17 +225,6 @@
                 if(!result) return false;
 
                 this.chartDgVisible = true;
-                
-                //绘图
-                let suCharts = new SuCharts(this.form, "chart", this.form.charttype, this.chartTheme);
-                let option = suCharts.setOption(this.chartConfig);
-                //delete option.toolbox;
-
-                this.echart = echarts.init(document.getElementById("chart"), this.chartTheme); //初始化echarts实例
-                this.echart.clear(); //清空
-                this.echart.resize(); //重新自适应
-                this.echart.setOption(option);
-
             },
             make3D_data(arr){ //拼接柱状图json
                 let jsonList = [];

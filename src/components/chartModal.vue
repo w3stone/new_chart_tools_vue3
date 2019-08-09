@@ -48,6 +48,7 @@
                 let suCharts = new SuCharts(this.data, "chart", this.data.charttype, this.theme);
                 let option = suCharts.setOption(this.config);
                 //delete option.toolbox;
+                console.log(JSON.stringify(option));
 
                 this.echart = echarts.init(document.getElementById("chart"), this.theme); //初始化echarts实例
                 this.echart.clear(); //清空
