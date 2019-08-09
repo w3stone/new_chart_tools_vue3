@@ -185,7 +185,7 @@
                 panelWidth: 1100,
                 panelHeight: 480,
                 chartTheme: "macarons", //图表主题
-                themeOptions: ["macarons", "infographic", "dark", "roma", "shine", "vintage"],
+                themeOptions: ["macarons", "infographic", "roma", "shine", "vintage"],
                 charttypeOptions: [],
                 chartdataType: 1,
                 echart: null, //echart对象
@@ -305,7 +305,7 @@
                 try {
                     let charttype = this.form.charttype;
                     let result = [];
-                    if(charttype>100 && charttype<=199){
+                    if((charttype>100 && charttype<=199) || (charttype>300 && charttype<=399)){
                         result = this.make3D_data(this.hotData);
 
                     }else if(charttype>400 && charttype<=499){
