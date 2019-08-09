@@ -9,13 +9,13 @@
 
 <script>
     import echarts from "echarts";
-    import china from 'echarts/map/json/china.json'
-    import 'echarts/theme/dark'
-    import 'echarts/theme/infographic'
-    import 'echarts/theme/macarons'
-    import 'echarts/theme/roma'
-    import 'echarts/theme/shine'
-    import 'echarts/theme/vintage'
+    import china from 'echarts/map/json/china.json';
+    import {SuCharts} from '@/assets/scripts/charts/suCharts.js';
+    import 'echarts/theme/infographic';
+    import 'echarts/theme/macarons';
+    import 'echarts/theme/roma';
+    import 'echarts/theme/shine';
+    import 'echarts/theme/vintage';
 
     export default {
         name: "chartModal",
