@@ -49,16 +49,17 @@
                 </div>
 
                 <el-form-item label="图表数据：" prop="" class="form_item form_chartdata">
-                    <el-radio-group v-model="chartdataType" class="form_radio">
+                    <el-radio-group v-model="chartdataType" class="form_radio" @change="chartdataTypeChanged">
                         <el-radio-button :label="1">表格</el-radio-button>
                         <el-radio-button :label="2">JSON</el-radio-button>
+                        <el-radio-button :label="3">echarts配置</el-radio-button>
                     </el-radio-group>
 
                     <div class="form_hottable" :style="{overflowX:needOverflow?'auto':'initial'}" v-show="chartdataType==1">
                         <hot-table :data="hotData" :settings="hotSettings" :language="language" ref="hotTable"></hot-table>
                     </div>
 
-                    <div class="form_chart_json" v-show="chartdataType==2">
+                    <div class="form_chart_json" v-show="chartdataType!=1">
                         <el-input type="textarea" v-model="jsonData" :rows="rows"></el-input>
                     </div>
                 </el-form-item>
@@ -119,7 +120,7 @@
 
         <!--图表弹框-->
         <chart-modal :panelWidth="panelWidth" :panelHeight="panelHeight" :visible.sync="chartDgVisible"
-            :data="form" :config="chartConfig" :theme="chartTheme">
+            :data="form" :option="option" :config="chartConfig" :theme="chartTheme">
         </chart-modal>
 
     </div>
@@ -140,6 +141,7 @@
                 cols: 20, //默认列数
                 form: {}, //主要配置
                 chartConfig: {}, //图表参数配置
+                option: {}, //配置
                 needOverflow: false,
                 language: 'zh-CN', //表格控件语言
                 hotData: [], //表格数据
@@ -219,8 +221,12 @@
                 let result = false;
                 if(1==this.chartdataType){
                     result = this.chartScheme();
+
                 }else if(2==this.chartdataType){
                     result = this.analyzeJson();
+
+                }else if(3==this.chartdataType){
+                    result = this.analyzeOption();
                 }
                 if(!result) return false;
 
@@ -300,6 +306,26 @@
                     return errorAlert();  
                 }
             },
+            analyzeOption(){ //解析option
+                let errorAlert = ()=>{
+                    this.$message({message:'数据格式错误！', type:'error'});
+                    return false;
+                };
+
+                try {
+                    let obj = JSON.parse(this.jsonData);
+                    if(!obj.hasOwnProperty("series")){
+                        return errorAlert();
+                    }else{
+                        this.option = obj;
+                        return true;
+                    }
+
+                } catch (error) {
+                    console.log(error);
+                    return errorAlert();
+                }
+            },
             //图表类型分组
             chartScheme(){
                 try {
@@ -330,6 +356,9 @@
             toggleShow(){
                 this.configShowing = !this.configShowing;
             },
+            chartdataTypeChanged(value){
+                if(value!=1) this.jsonData = "";
+            }
         },
 		components:{
 			HotTable, chartModal

@@ -21,6 +21,7 @@
         name: "chartModal",
         props:{
             data: Object,
+            option: Object,
             config: Object,
             theme: String,
             panelWidth: Number,
@@ -46,7 +47,7 @@
             makeChart(){
                 //绘图
                 let suCharts = new SuCharts(this.data, "chart", this.data.charttype, this.theme);
-                let option = suCharts.setOption(this.config);
+                let option = this.option || suCharts.setOption(this.config);
                 //delete option.toolbox;
                 console.log(JSON.stringify(option));
 
