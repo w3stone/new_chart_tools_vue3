@@ -47,7 +47,8 @@
             makeChart(){
                 //绘图
                 let suCharts = new SuCharts(this.data, "chart", this.data.charttype, this.theme);
-                let option = this.option || suCharts.setOption(this.config);
+                //let option = this.option || suCharts.setOption(this.config);
+                let option = suCharts.setOption(this.config);
                 //delete option.toolbox;
                 console.log(JSON.stringify(option));
 
