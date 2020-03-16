@@ -66,10 +66,15 @@
 
                 <h3 class="sub_title">
                     <i class="el-icon-mouse title_icon"></i>其它配置
-                    <i class="el-icon-arrow-up collapse_btn" @click="toggleShow" :class="{hover:configShowing, unhover:!configShowing}"></i>
+                    <i class="el-icon-arrow-up collapse_btn" :class="{hover:configShowing, unhover:!configShowing}"
+                        @click="configShowing=!configShowing"></i>
                 </h3>
                 <transition name="slide-fade">
                     <div class="form_group clearfix" v-show="configShowing">
+                        <el-form-item label="是否移动端：" prop="ifMobile" class="form_item left">
+                            <el-switch v-model="chartConfig.ifMobile"></el-switch>
+                        </el-form-item>
+
                         <el-form-item label="图表宽度：" prop="panelWidth" class="form_item left">
                             <el-input-number v-model="panelWidth" controls-position="right" :min="100" :max="1920"></el-input-number>
                         </el-form-item>
@@ -137,7 +142,7 @@
         name: "home",
         data (){
             return{
-                rows: 10, //默认行数
+                rows: 30, //默认行数
                 cols: 20, //默认列数
                 form: {}, //主要配置
                 chartConfig: {}, //图表参数配置
@@ -184,6 +189,7 @@
                         });
                     }
                 },
+                ifMobile: false,
                 panelWidth: 1100,
                 panelHeight: 480,
                 chartTheme: "macarons", //图表主题
@@ -243,6 +249,7 @@
             },
             make4D_data(arr){ //拼接散点图json
                 let jsonList = [];
+                console.log(arr);
                 for(var i=0; i<=arr.length && arr[i][0]!=""; i++){ //列循环
                     jsonList.push({
                         "name": arr[i][0], 
@@ -251,6 +258,7 @@
                         "value": this.$string2Num(arr[i][3])
                     });
                 }
+                console.log(jsonList);
                 return jsonList;
             },
             make2D_data(arr){ //拼接饼图、地图json
@@ -260,19 +268,21 @@
                 }
                 return jsonList;
             },
-            analyzeJson(){ //解析json
-                let errorAlert = ()=>{
+            /****解析json****/
+            analyzeJson(){
+                let errorAlert = ()=>{ //内部函数，输出错误
                     this.$message({message:'数据格式错误！', type:'error'});
                     return false;
                 };
-                let checkList = (list)=>{
-                    return (list.length>0 && typeof list[0]!="undefined")? true: false;
-                };
-                let checkChartdata = (chartdata, callback)=>{
+                let checkChartdata = (chartdata, callback)=>{ //内部函数，验证chartdata类型是否满足{x:'',y:'',value:'',name:''}
                     let xdata = Enumerable.from(chartdata).select(o=>o.x).distinct().toArray();
                     let ydata = Enumerable.from(chartdata).select(o=>o.y).distinct().toArray();
                     let valuedata = Enumerable.from(chartdata).select(o=>o.value).distinct().toArray();
                     let namedata = Enumerable.from(chartdata).select(o=>o.name).distinct().toArray();
+
+                    let checkList = (list)=>{ //内部函数
+                        return (list.length>0 && typeof list[0]!="undefined")? true: false;
+                    };
 
                     if( checkList(xdata) && checkList(xdata) && checkList(valuedata) && checkList(namedata) ){
                         if(callback) callback();
@@ -284,14 +294,15 @@
 
                 try {
                     let json = JSON.parse(this.jsonData);
+                    //console.log(json);
                     let chartdata = [];
-                    if(json.hasOwnProperty("chartdata")){
+                    if(json.hasOwnProperty("chartdata")){ //对象类型
                         chartdata = json.chartdata;
                         return checkChartdata(chartdata, ()=>{
                             this.form = json;
                         });
 
-                    }else if(Array.isArray(json)){ //如果是数组
+                    }else if(Array.isArray(json)){ //数组类型
                         chartdata = json;
                         return checkChartdata(chartdata, ()=>{
                             this.form.chartdata = json;
@@ -306,7 +317,8 @@
                     return errorAlert();  
                 }
             },
-            analyzeOption(){ //解析option
+            /****解析option****/
+            analyzeOption(){
                 let errorAlert = ()=>{
                     this.$message({message:'数据格式错误！', type:'error'});
                     return false;
@@ -353,9 +365,7 @@
             mapColorChanged(value){
                 this.chartConfig.mapConfig.rangeHighColor = value;
             },
-            toggleShow(){
-                this.configShowing = !this.configShowing;
-            },
+            //切换图表数据类型
             chartdataTypeChanged(value){
                 if(value!=1) this.jsonData = "";
             }
