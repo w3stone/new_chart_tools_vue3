@@ -20,32 +20,32 @@ module.exports = {
         port: 8020 //测试端口
     }, 
     configureWebpack: config => {
-        if (process.env.NODE_ENV === 'production') { //为生产环境修改配置
-            config.mode = 'production';
+        // if (process.env.NODE_ENV === 'production') { //为生产环境修改配置
+        //     config.mode = 'production';
             
-            //修改输出的js名称
-            Object.assign(config.output, {
-                filename: assetsDir + '/js/[name].[contenthash:8]_' + version + '.js',
-                chunkFilename: assetsDir + '/js/[name].[contenthash:8]_' + version + '.js'
-            });
+        //     //修改输出的js名称
+        //     Object.assign(config.output, {
+        //         filename: assetsDir + '/js/[name].[contenthash:8]_' + version + '.js',
+        //         chunkFilename: assetsDir + '/js/[name].[contenthash:8]_' + version + '.js'
+        //     });
             
-            //修改输出的css名称
-            config.plugins.some(obj => {
-                if(obj.options){
-                    if(obj.options.filename && obj.options.chunkFilename){
-                        obj.options = {
-                            filename: assetsDir + '/css/[name].[contenthash:8]_' + version + '.css',
-                            chunkFilename: assetsDir + '/css/[name].[contenthash:8]_' + version + '.css'
-                        }
-                        return true; //跳出循环
-                    }
-                }
-            })
-            //console.log(JSON.stringify(config));
+        //     //修改输出的css名称
+        //     config.plugins.some(obj => {
+        //         if(obj.options){
+        //             if(obj.options.filename && obj.options.chunkFilename){
+        //                 obj.options = {
+        //                     filename: assetsDir + '/css/[name].[contenthash:8]_' + version + '.css',
+        //                     chunkFilename: assetsDir + '/css/[name].[contenthash:8]_' + version + '.css'
+        //                 }
+        //                 return true; //跳出循环
+        //             }
+        //         }
+        //     })
+        //     //console.log(JSON.stringify(config));
 
-        } else { //为开发环境修改配置
+        // } else { //为开发环境修改配置
 
             
-        }
+        // }
     }
 }
